@@ -4,7 +4,6 @@ const app = express()
 const cors = require("cors")
 const port = 3000
 const multer = require("multer")
-const upload ({ dest: "images/" })
 const bodyParser = require("body-parser")
 const path = require('path')
 
