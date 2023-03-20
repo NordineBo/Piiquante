@@ -1,23 +1,55 @@
-const jwt = require("jsonwebtoken")
+const mongoose = require("mongoose")
 
-function getPiiquante(req, res){
-    const header = req.header("Authorization")
-    if (header == null) return res.status(403).send({ message: "Invalid" })
 
-    const token = header.split(" ")[1]
-    if (token == null) return res.status(403).send({ message: "Token cannot be null" })
+const productSchema = new mongoose.Schema({
+    userId: String,
+    name: String,
+    manufacturer: String,
+    description: String,
+    mainPepper: String,
+    imageUrl: String,
+    heat: Number,
+    likes: Number,
+    dislikes: Number,
+    userLiked: [String],
+    userDisliked: [String]
+})
+const Product = mongoose.model("Product", productSchema)
 
-    jwt.verify(token, process.env0JWT_PASSWORD, (err, decoded) => handleToken(err, decoded, res))
 
-    
-}
 
-function handleToken(err, decoded, res) {
-    if (err) res.status(403).send({ message: "Token invalid " + err })
-    else {
-        console.log("le token a l'air bon", decoded)
-        res.send({ message: "ok voici tous les plats "})
+function getPiiquante(req, res) {
+    console.log("le token a été validé, nous sommes dans getPiiquante")
+        // console.log("le token a l'air bon", decoded)
+        Product.find({}).then(products => res.send(products))
+        // res.send({ message: [{piiquante: "piiquante1"}, {piiquante: "piiquante2"}] })
     }
+
+function creatPiiquante(req,res) {
+    const piiquante = JSON.parse(req.body.piiquante)
+
+    const {name, manufacturer, description, mainPepper, heat, userId} = piiquante
+    console.log('piiquante:', piiquante)
+
+
+    console.log({ body: req.body.piiquante })
+    console.log({ file: req.file })
+    const imageUrl = req.file.destination + req.file.filename
+
+    const product = new Product({
+        userId,
+        name,
+        manufacturer,
+        description,
+        mainPepper,
+        imageUrl,
+        heat,
+        likes: 0,
+        dislikes: 0,
+        userLiked: [],
+        userDisliked: []
+    })
+    product.save().then((res)=> console.log("produit enregistré", res)).catch(console.error)
 }
 
-module.exports = {getPiiquante}
+module.exports = { getPiiquante, creatPiiquante }
